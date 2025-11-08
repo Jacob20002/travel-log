@@ -48,19 +48,38 @@ travel_log/
 
 ### Installasjon og kjøring
 
-1. **Klon eller naviger til prosjektmappen:**
+1. **Klon repositoryet:**
    ```bash
-   cd travel_log
+   git clone https://github.com/Jacob20002/travel-log.git
+   cd travel-log
    ```
 
 2. **Bygg og start containere:**
    ```bash
-   docker-compose up --build
+   docker-compose up -d --build
    ```
 
 3. **Åpne nettleseren:**
    - Frontend: http://localhost
    - Backend API: http://localhost:3000/api/health
+
+### Oppdatere fra GitHub
+
+Hvis du har gjort endringer på en annen maskin og vil hente dem:
+
+```bash
+git pull origin main
+docker-compose down
+docker-compose up -d --build
+```
+
+### Pushe endringer til GitHub
+
+```bash
+git add .
+git commit -m "Beskrivelse av endringene"
+git push origin main
+```
 
 ### Utvikling
 
