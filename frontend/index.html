@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Log - Reiselogg</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-main">
+                    <h1>🌍 Reiselogg</h1>
+                    <p>Klikk på kartet for å legge til pins! Marker steder du har besøkt og planlegg fremtidige reiser</p>
+                </div>
+                <div id="stats-dashboard" class="stats-dashboard">
+                    <div class="stat-item">
+                        <div class="stat-icon">📍</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-visited-count">0</div>
+                            <div class="stat-label">Besøkte steder</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🌎</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-countries-count">0</div>
+                            <div class="stat-label">Land</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-planned-count">0</div>
+                            <div class="stat-label">Planlagte reiser</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="mode-selector">
+                <button id="visited-mode" class="mode-btn active">Besøkte steder</button>
+                <button id="planned-mode" class="mode-btn">Planlagte reiser</button>
+            </div>
+            <div class="search-container">
+                <input type="text" id="city-search" class="city-search-input" placeholder="Søk etter by (f.eks. Paris, Tokyo, New York)">
+                <button id="search-btn" class="btn btn-primary">Søk</button>
+                <div id="search-results" class="search-results"></div>
+            </div>
+            <div class="action-buttons">
+                <button id="clear-selection-btn" class="btn btn-secondary">Fjern valg</button>
+            </div>
+        </div>
+
+        <div id="map" class="map-container"></div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 id="sidebar-title">Besøkte steder</h2>
+                <div class="view-toggle">
+                    <button id="list-view-btn" class="view-btn active" data-view="list">📋 Liste</button>
+                    <button id="timeline-view-btn" class="view-btn" data-view="timeline">📅 Tidslinje</button>
+                </div>
+            </div>
+            <div id="locations-list" class="locations-list"></div>
+            <div id="timeline-view" class="timeline-view" style="display: none;"></div>
+        </div>
+
+        <!-- Quick action popup for map clicks -->
+        <div id="quick-action-popup" class="quick-action-popup">
+            <div class="quick-action-content">
+                <h3>Hva vil du gjøre med dette stedet?</h3>
+                <div class="quick-action-buttons">
+                    <button class="quick-action-btn visited-btn" data-action="visited">
+                        ✅ Jeg har vært her
+                    </button>
+                    <button class="quick-action-btn planned-btn" data-action="planned">
+                        🎯 Jeg ønsker å dra hit
+                    </button>
+                    <button class="quick-action-btn cancel-btn" data-action="cancel">
+                        Avbryt
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for adding/editing locations -->
+        <div id="location-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modal-title">Legg til sted</h2>
+                <form id="location-form">
+                    <input type="hidden" id="location-id">
+                    <div class="form-group">
+                        <label for="location-name">Stedsnavn (f.eks. "Oslo", "Paris", "New York"):</label>
+                        <input type="text" id="location-name" placeholder="Skriv inn stedsnavn" required>
+                    </div>
+                    <div class="form-group info-text">
+                        <p>📍 <strong>Koordinater:</strong> Disse fylles automatisk når du klikker på kartet. Koordinatene viser nøyaktig hvor på jorden stedet ligger.</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                            <strong>Breddegrad</strong> (nord/sør): Positivt tall = nord for ekvator, negativt = sør<br>
+                            <strong>Lengdegrad</strong> (øst/vest): Positivt tall = øst for Greenwich, negativt = vest
+                        </p>
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="location-lat">Breddegrad:</label>
+                        <input type="number" id="location-lat" step="any">
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="location-lng">Lengdegrad:</label>
+                        <input type="number" id="location-lng" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="location-notes">Notater (valgfritt):</label>
+                        <textarea id="location-notes" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-date">Dato (valgfritt):</label>
+                        <input type="date" id="location-date">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Lagre</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-btn">Avbryt</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/geocoding.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
